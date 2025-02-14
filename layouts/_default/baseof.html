@@ -2,7 +2,7 @@
 <html lang="{{ .Site.Language.Lang }}">
 
 <head>
-  <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
+  <title>{{ block "title" . }}{{ .Site.Params.HeadTitle | default .Site.Title }}{{ end }}</title>
   {{ partial "head.html" . }}
 </head>
 
@@ -33,7 +33,11 @@
   </script>
   {{ end }}
 
-  {{ if .Site.IsServer }}
+  {{ if .Site.Params.disableDefaultJsScripts }}
+  {{ if not .Site.Params.hideColorSchemeToggle }}
+  {{ errorf "Invalid configuration. Default JS scripts are disabled, but 'hideColorSchemeToggle' is false." }}
+  {{end}}
+  {{ else if hugo.IsServer }}
   {{ $script := resources.Get "js/coder.js" }}
   <script src="{{ $script.RelPermalink }}"></script>
   {{ else }}
@@ -42,7 +46,7 @@
   {{ end }}
 
   {{ range .Site.Params.customJS }}
-  {{ if $.Site.IsServer }}
+  {{ if hugo.IsServer }}
   {{ $script := resources.Get . }}
   <script src="{{ $script.RelPermalink }}"></script>
   {{ else }}
@@ -52,7 +56,7 @@
   {{ end }}
 
   {{ range .Site.Params.customRemoteJS }}
-  {{ if $.Site.IsServer }}
+  {{ if hugo.IsServer }}
   {{ $script := resources.GetRemote . }}
   <script src="{{ $script.RelPermalink }}"></script>
   {{ else }}
@@ -80,6 +84,10 @@
   {{- partial "analytics/cloudflare" . -}}
   {{ end }}
 
+  {{ if and .Site.Params.baidu .Site.Params.baidu.token }}
+  {{- partial "analytics/baidu" . -}}
+  {{ end }}
+
   {{ if and .Site.Params.wideAngleAnalytics .Site.Params.wideAngleAnalytics.siteID }}
   {{- partial "analytics/wideangle" . -}}
   {{ end }}
@@ -100,6 +108,14 @@
   {{- partial "analytics/microanalyticsio" . -}}
   {{ end }}
 
+  {{ if and .Site.Params.onedollarstats .Site.Params.onedollarstats.id }}
+  {{- partial "analytics/onedollarstats" . -}}
+  {{ end }}
+
+  {{ if .Site.Params.vercelAnalytics}}
+  {{- partial "analytics/vercel" . -}}
+  {{ end }}
+
   {{ if and .Site.Params.yandexMetrika .Site.Params.yandexMetrika.id }}
   {{- partial "analytics/yandex-metrika" . -}}
   {{ end }}
@@ -112,7 +128,10 @@
   {{- partial "analytics/pirsch" . -}}
   {{ end }}
 
+  {{ if and .Site.Params.clicky .Site.Params.clicky.id }}
+  {{- partial "analytics/clicky" . -}}
+  {{ end }}
+
   {{- partial "body/extensions" . -}}
 </body>
-
 </html>
